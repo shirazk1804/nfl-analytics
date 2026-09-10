@@ -1,3 +1,7 @@
+## Live Demo
+
+https://nfl-analytics-zeta.vercel.app
+
 # NFL Analytics & Game Prediction Platform
 
 A full-stack NFL analytics application that uses historical
