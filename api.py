@@ -185,16 +185,11 @@ def predict_game(
     request: PredictionRequest
 ):
 
-    home_team = (
-        request.home_team.upper()
-    )
-
-    away_team = (
-        request.away_team.upper()
-    )
+    home_team = request.home_team.upper()
+    away_team = request.away_team.upper()
 
     # ------------------------------------------------------------
-    # LOAD SCHEDULE
+    # LOAD CURRENT-SEASON SCHEDULE
     # ------------------------------------------------------------
 
     games = get_schedule(
@@ -232,112 +227,37 @@ def predict_game(
         named=True
     )
 
-    current_game_date = (
-        game["gameday"]
+    current_game_date = game["gameday"]
+
+    # ------------------------------------------------------------
+    # LOAD PRIOR-SEASON DATA
+    # ------------------------------------------------------------
+
+    prior_season = request.season - 1
+
+    prior_games = get_schedule(
+        prior_season
+    )
+
+    prior_pbp = get_pbp(
+        prior_season
     )
 
     # ------------------------------------------------------------
-    # DECIDE WHICH SEASON DATA TO USE
-    # ------------------------------------------------------------
-
-    use_prior_season = False
-
-    # Week 1 always uses last season
-    if request.week == 1:
-
-        use_prior_season = True
-
-    else:
-
-        try:
-
-            pbp = get_pbp(
-                request.season
-            )
-
-            # Completed games before the selected week
-            completed_games = regular_games.filter(
-                (pl.col("week") < request.week) &
-                pl.col("home_score").is_not_null() &
-                pl.col("away_score").is_not_null()
-            )
-
-            teams_that_played = set()
-
-            for completed_game in completed_games.iter_rows(
-                named=True
-            ):
-
-                teams_that_played.add(
-                    completed_game["home_team"]
-                )
-
-                teams_that_played.add(
-                    completed_game["away_team"]
-                )
-
-            # Only use current-season stats if BOTH teams
-            # have already played a completed game
-            if (
-                home_team not in teams_that_played or
-                away_team not in teams_that_played
-            ):
-
-                use_prior_season = True
-
-        except ValueError:
-
-            use_prior_season = True
-
-    # ------------------------------------------------------------
-    # BUILD FEATURES
+    # BUILD PRIOR-SEASON FEATURES
     # ------------------------------------------------------------
 
     try:
 
-        if use_prior_season:
-
-            prior_season = (
-                request.season - 1
-            )
-
-            prior_games = get_schedule(
-                prior_season
-            )
-
-            prior_pbp = get_pbp(
-                prior_season
-            )
-
-            features = (
-                build_prior_season_matchup_features(
-                    games=prior_games,
-                    pbp=prior_pbp,
-                    season=prior_season,
-                    home_team=home_team,
-                    away_team=away_team
-                )
-            )
-
-            data_source = (
-                f"{prior_season} season priors"
-            )
-
-        else:
-
-            features = build_matchup_features(
-                games=games,
-                pbp=pbp,
-                season=request.season,
-                week=request.week,
+        prior_features = (
+            build_prior_season_matchup_features(
+                games=prior_games,
+                pbp=prior_pbp,
+                season=prior_season,
                 home_team=home_team,
-                away_team=away_team,
-                current_game_date=current_game_date
+                away_team=away_team
             )
-
-            data_source = (
-                f"{request.season} season data"
-            )
+        )
 
     except ValueError as error:
 
@@ -346,35 +266,190 @@ def predict_game(
             detail=str(error)
         )
 
-    # ------------------------------------------------------------
-    # MODEL INPUT
-    # ------------------------------------------------------------
-
-    feature_row = pl.DataFrame(
-        [features]
+    prior_feature_row = pl.DataFrame(
+        [prior_features]
     )
 
-    game_features = (
-        feature_row
+    prior_model_input = (
+        prior_feature_row
         .select(
             LOGISTIC_FEATURE_COLUMNS
         )
         .to_numpy()
     )
 
-    # ------------------------------------------------------------
-    # PREDICTION
-    # ------------------------------------------------------------
-
-    home_probability = (
+    prior_home_probability = (
         model.predict_proba(
-            game_features
+            prior_model_input
         )[0][1]
     )
 
+    # ------------------------------------------------------------
+    # WEEK 1 ALWAYS USES PRIOR-SEASON DATA
+    # ------------------------------------------------------------
+
+    if request.week == 1:
+
+        home_probability = (
+            prior_home_probability
+        )
+
+        data_source = (
+            f"{prior_season} season priors"
+        )
+
+    else:
+
+        # --------------------------------------------------------
+        # TRY TO LOAD CURRENT-SEASON PLAY-BY-PLAY
+        # --------------------------------------------------------
+
+        try:
+
+            pbp = get_pbp(
+                request.season
+            )
+
+        except ValueError:
+
+            pbp = None
+
+        # --------------------------------------------------------
+        # FIND COMPLETED GAMES BEFORE SELECTED WEEK
+        # --------------------------------------------------------
+
+        completed_games = regular_games.filter(
+            (pl.col("week") < request.week) &
+            pl.col("home_score").is_not_null() &
+            pl.col("away_score").is_not_null()
+        )
+
+        home_games_played = completed_games.filter(
+            (pl.col("home_team") == home_team) |
+            (pl.col("away_team") == home_team)
+        ).height
+
+        away_games_played = completed_games.filter(
+            (pl.col("home_team") == away_team) |
+            (pl.col("away_team") == away_team)
+        ).height
+
+        minimum_games_played = min(
+            home_games_played,
+            away_games_played
+        )
+
+        # --------------------------------------------------------
+        # IF CURRENT DATA IS NOT READY, USE PRIOR SEASON
+        # --------------------------------------------------------
+
+        if (
+            pbp is None or
+            minimum_games_played == 0
+        ):
+
+            home_probability = (
+                prior_home_probability
+            )
+
+            data_source = (
+                f"{prior_season} season priors"
+            )
+
+        else:
+
+            # ----------------------------------------------------
+            # BUILD CURRENT-SEASON FEATURES
+            # ----------------------------------------------------
+
+            try:
+
+                current_features = build_matchup_features(
+                    games=games,
+                    pbp=pbp,
+                    season=request.season,
+                    week=request.week,
+                    home_team=home_team,
+                    away_team=away_team,
+                    current_game_date=current_game_date
+                )
+
+            except ValueError as error:
+
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(error)
+                )
+
+            current_feature_row = pl.DataFrame(
+                [current_features]
+            )
+
+            current_model_input = (
+                current_feature_row
+                .select(
+                    LOGISTIC_FEATURE_COLUMNS
+                )
+                .to_numpy()
+            )
+
+            current_home_probability = (
+                model.predict_proba(
+                    current_model_input
+                )[0][1]
+            )
+
+            # ----------------------------------------------------
+            # EARLY-SEASON BLENDING
+            # ----------------------------------------------------
+
+            current_weight = min(
+                minimum_games_played / 4,
+                1.0
+            )
+
+            prior_weight = (
+                1.0 - current_weight
+            )
+
+            home_probability = (
+                prior_home_probability * prior_weight +
+                current_home_probability * current_weight
+            )
+
+            # ----------------------------------------------------
+            # DATA SOURCE LABEL
+            # ----------------------------------------------------
+
+            if current_weight >= 1.0:
+
+                data_source = (
+                    f"{request.season} season data"
+                )
+
+            else:
+
+                prior_percent = round(
+                    prior_weight * 100
+                )
+
+                current_percent = round(
+                    current_weight * 100
+                )
+
+                data_source = (
+                    f"{prior_percent}% "
+                    f"{prior_season} priors + "
+                    f"{current_percent}% "
+                    f"{request.season} season data"
+                )
+
+    # ------------------------------------------------------------
+    # FINAL PREDICTION
+    # ------------------------------------------------------------
+
     away_probability = (
-        1 -
-        home_probability
+        1 - home_probability
     )
 
     if home_probability >= 0.5:
