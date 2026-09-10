@@ -202,9 +202,8 @@ def predict_game(
     )
 
     regular_games = games.filter(
-        games["game_type"] == "REG"
+        pl.col("game_type") == "REG"
     )
-
 
     # ------------------------------------------------------------
     # FIND SCHEDULED GAME
@@ -237,23 +236,58 @@ def predict_game(
         game["gameday"]
     )
 
-
     # ------------------------------------------------------------
-    # CHECK CURRENT-SEASON DATA
+    # DECIDE WHICH SEASON DATA TO USE
     # ------------------------------------------------------------
 
     use_prior_season = False
 
-    try:
-
-        pbp = get_pbp(
-            request.season
-        )
-
-    except ValueError:
+    # Week 1 always uses last season
+    if request.week == 1:
 
         use_prior_season = True
 
+    else:
+
+        try:
+
+            pbp = get_pbp(
+                request.season
+            )
+
+            # Completed games before the selected week
+            completed_games = regular_games.filter(
+                (pl.col("week") < request.week) &
+                pl.col("home_score").is_not_null() &
+                pl.col("away_score").is_not_null()
+            )
+
+            teams_that_played = set()
+
+            for completed_game in completed_games.iter_rows(
+                named=True
+            ):
+
+                teams_that_played.add(
+                    completed_game["home_team"]
+                )
+
+                teams_that_played.add(
+                    completed_game["away_team"]
+                )
+
+            # Only use current-season stats if BOTH teams
+            # have already played a completed game
+            if (
+                home_team not in teams_that_played or
+                away_team not in teams_that_played
+            ):
+
+                use_prior_season = True
+
+        except ValueError:
+
+            use_prior_season = True
 
     # ------------------------------------------------------------
     # BUILD FEATURES
@@ -261,14 +295,7 @@ def predict_game(
 
     try:
 
-        # Week 1 always uses the previous season.
-        # Also use the previous season when current
-        # play-by-play data is unavailable.
-
-        if (
-            request.week == 1 or
-            use_prior_season
-        ):
+        if use_prior_season:
 
             prior_season = (
                 request.season - 1
@@ -319,7 +346,6 @@ def predict_game(
             detail=str(error)
         )
 
-
     # ------------------------------------------------------------
     # MODEL INPUT
     # ------------------------------------------------------------
@@ -335,7 +361,6 @@ def predict_game(
         )
         .to_numpy()
     )
-
 
     # ------------------------------------------------------------
     # PREDICTION
@@ -363,6 +388,10 @@ def predict_game(
         predicted_winner = (
             away_team
         )
+
+    # ------------------------------------------------------------
+    # LOG DATA SOURCE
+    # ------------------------------------------------------------
 
     print(
         f"Prediction: {away_team} @ {home_team} | "
