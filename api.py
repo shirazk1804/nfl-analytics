@@ -364,6 +364,11 @@ def predict_game(
             away_team
         )
 
+    print(
+        f"Prediction: {away_team} @ {home_team} | "
+        f"Week {request.week}, {request.season} | "
+        f"Data source: {data_source}"
+    )
 
     # ------------------------------------------------------------
     # RESPONSE
