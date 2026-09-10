@@ -62,6 +62,7 @@ function App() {
   const [prediction, setPrediction] = useState(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [gamesLoading, setGamesLoading] = useState(true)
 
   const currentGame = (
     games.length > 0 &&
@@ -77,6 +78,7 @@ function App() {
 
       setError("")
       setPrediction(null)
+      setGamesLoading(true)
 
       try {
 
@@ -99,17 +101,21 @@ function App() {
         setGames(data.games)
 
         if (data.games.length > 0) {
-
           setSelectedGame("0")
-
         }
 
       } catch (error) {
 
         setGames([])
         setSelectedGame("")
-        setError(error.message)
 
+        setError(
+          "Could not load games. The backend may still be waking up. Try refreshing in a few seconds."
+        )
+
+      } finally {
+
+        setGamesLoading(false)
       }
     }
 
@@ -415,13 +421,19 @@ function App() {
           <button
             className="predict-button"
             onClick={predictGame}
-            disabled={loading}
+            disabled={
+              loading ||
+              gamesLoading ||
+              !currentGame
+            }
           >
 
             {
-              loading
-                ? "Predicting..."
-                : "Predict Game"
+              gamesLoading
+                ? "Loading Games..."
+                : loading
+                  ? "Predicting..."
+                  : "Predict Game"
             }
 
           </button>
