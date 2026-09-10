@@ -1,0 +1,609 @@
+* {
+  box-sizing: border-box;
+}
+
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #1e293b,
+      #020617 60%
+    );
+
+  color: white;
+}
+
+
+button,
+select {
+  font: inherit;
+}
+
+
+.app {
+  min-height: 100vh;
+  padding: 70px 20px;
+}
+
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+
+header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+
+.eyebrow {
+  margin: 0 0 10px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  letter-spacing: 3px;
+
+  color: #60a5fa;
+}
+
+
+h1 {
+  margin: 0;
+
+  font-size: clamp(
+    42px,
+    7vw,
+    68px
+  );
+
+  line-height: 1;
+}
+
+
+.subtitle {
+  max-width: 650px;
+
+  margin:
+    22px auto 0;
+
+  color: #94a3b8;
+
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+
+.predictor-card {
+  padding: 40px;
+
+  background:
+    rgba(
+      15,
+      23,
+      42,
+      0.88
+    );
+
+  border:
+    1px solid #334155;
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 30px 80px
+    rgba(0, 0, 0, 0.35);
+}
+
+
+.week-section {
+  display: flex;
+  flex-direction: column;
+
+  width: 170px;
+
+  margin:
+    0 auto 40px;
+}
+
+
+.week-section label {
+  margin-bottom: 8px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #94a3b8;
+}
+
+
+select {
+  width: 100%;
+
+  padding: 15px;
+
+  color: white;
+  background: #0f172a;
+
+  border:
+    1px solid #475569;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  cursor: pointer;
+}
+
+
+select:focus {
+  border-color: #60a5fa;
+}
+
+
+.matchup {
+  display: grid;
+
+  grid-template-columns:
+    1fr auto 1fr;
+
+  align-items: end;
+
+  gap: 25px;
+}
+
+
+.team {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+.team-label {
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #64748b;
+}
+
+
+.team select {
+  font-size: 22px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+
+.at-symbol {
+  padding-bottom: 14px;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  color: #475569;
+}
+
+
+.predict-button {
+  width: 100%;
+
+  margin-top: 35px;
+  padding: 17px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #2563eb;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+
+.predict-button:hover {
+  background: #3b82f6;
+  transform: translateY(-1px);
+}
+
+
+.predict-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.error {
+  margin-top: 25px;
+  padding: 15px;
+
+  text-align: center;
+
+  color: #fecaca;
+  background:
+    rgba(
+      127,
+      29,
+      29,
+      0.4
+    );
+
+  border:
+    1px solid #991b1b;
+
+  border-radius: 10px;
+}
+
+
+.results {
+  margin-top: 35px;
+  padding-top: 35px;
+
+  text-align: center;
+
+  border-top:
+    1px solid #334155;
+}
+
+
+.result-label {
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 3px;
+
+  color: #94a3b8;
+}
+
+
+.results h2 {
+  margin:
+    10px 0 30px;
+
+  font-size: 44px;
+
+  color: #60a5fa;
+}
+
+
+.probabilities {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 20px;
+}
+
+
+.probabilities div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 22px;
+
+  background: #0f172a;
+
+  border:
+    1px solid #334155;
+
+  border-radius: 14px;
+}
+
+
+.probabilities span {
+  color: #94a3b8;
+
+  font-weight: 600;
+}
+
+
+.probabilities strong {
+  font-size: 28px;
+}
+
+
+@media (
+  max-width: 650px
+) {
+
+  .predictor-card {
+    padding: 25px;
+  }
+
+
+  .matchup {
+    grid-template-columns: 1fr;
+  }
+
+
+  .at-symbol {
+    padding: 0;
+
+    text-align: center;
+  }
+
+
+  .probabilities {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+.game-section {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+
+.game-label {
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #64748b;
+}
+
+
+.game-section select {
+  padding: 18px;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.matchup-card {
+  display: grid;
+  grid-template-columns:
+    1fr 120px 1fr;
+
+  align-items: center;
+
+  gap: 30px;
+
+  margin-top: 30px;
+  padding: 30px;
+
+  background: #0f172a;
+
+  border:
+    1px solid #334155;
+
+  border-radius: 18px;
+}
+
+
+.matchup-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+
+.matchup-team img {
+  width: 110px;
+  height: 110px;
+
+  object-fit: contain;
+
+  margin: 15px 0;
+}
+
+
+.matchup-team h2 {
+  margin: 0 0 6px;
+
+  font-size: 19px;
+}
+
+
+.matchup-team strong {
+  color: #94a3b8;
+
+  font-size: 14px;
+}
+
+
+.side-label {
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+}
+
+
+.matchup-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 10px;
+
+  color: #94a3b8;
+}
+
+
+.matchup-center span {
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+}
+
+
+.matchup-center strong {
+  color: white;
+
+  font-size: 34px;
+}
+
+
+.matchup-center small {
+  color: #64748b;
+}
+
+
+@media (max-width: 650px) {
+
+  .matchup-card {
+    grid-template-columns: 1fr;
+
+    gap: 20px;
+  }
+
+
+  .matchup-center {
+    padding: 10px 0;
+  }
+
+
+  .matchup-team img {
+    width: 90px;
+    height: 90px;
+  }
+
+}
+
+.winner-logo {
+  width: 120px;
+  height: 120px;
+
+  object-fit: contain;
+
+  margin-top: 20px;
+}
+
+
+.winner-name {
+  margin: 10px 0 5px;
+
+  font-size: 30px;
+}
+
+
+.winner-probability {
+  margin-bottom: 30px;
+
+  font-size: 42px;
+  font-weight: 800;
+
+  color: #60a5fa;
+}
+
+
+.probability-bars {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+
+  margin-top: 20px;
+
+  text-align: left;
+}
+
+
+.probability-row {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+.probability-header {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.probability-header span {
+  color: #cbd5e1;
+
+  font-weight: 600;
+}
+
+
+.probability-header strong {
+  color: white;
+}
+
+
+.bar-track {
+  width: 100%;
+  height: 14px;
+
+  overflow: hidden;
+
+  background: #1e293b;
+
+  border-radius: 999px;
+}
+
+
+.bar-fill {
+  height: 100%;
+
+  background: #3b82f6;
+
+  border-radius: 999px;
+
+  transition: width 0.5s ease;
+}
+
+.data-source {
+  margin-top: 24px;
+
+  text-align: center;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
