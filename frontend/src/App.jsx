@@ -63,6 +63,7 @@ function App() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [gamesLoading, setGamesLoading] = useState(true)
+  const [matchupStats, setMatchupStats] = useState(null)
 
   const currentGame = (
     games.length > 0 &&
@@ -122,6 +123,40 @@ function App() {
     loadGames()
 
   }, [season, week])
+
+  useEffect(() => {
+
+    async function loadMatchupStats() {
+
+      if (!currentGame) {
+        setMatchupStats(null)
+        return
+      }
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/matchup-stats/${season}/${week}/${currentGame.away_team}/${currentGame.home_team}`
+        )
+
+        if (!response.ok) {
+          setMatchupStats(null)
+          return
+        }
+
+        const data = await response.json()
+
+        setMatchupStats(data)
+
+      } catch (error) {
+
+        setMatchupStats(null)
+      }
+    }
+
+    loadMatchupStats()
+
+  }, [currentGame, season, week])
 
   async function predictGame() {
 
@@ -430,6 +465,131 @@ function App() {
                   <strong>
                     {currentGame.home_team}
                   </strong>
+
+                </div>
+
+              </div>
+
+            )
+          }
+
+          {
+            matchupStats && (
+
+              <div className="team-stats-card">
+
+                <div className="team-stats-column">
+
+                  <h3>
+                    {teamInfo[matchupStats.away.team]?.name}
+                  </h3>
+
+                  <div className="team-record">
+                    {matchupStats.away.record}
+                  </div>
+
+                  <div className="stats-grid">
+
+                    <div className="stats-group">
+
+                      <span className="stats-heading">
+                        OFFENSE
+                      </span>
+
+                      <p>
+                        PPG: {matchupStats.away.points_per_game}
+                      </p>
+
+                      <p>
+                        Yards/Game: {matchupStats.away.yards_per_game}
+                      </p>
+
+                      <p>
+                        EPA/Play: {matchupStats.away.epa_per_play}
+                      </p>
+
+                    </div>
+
+
+                    <div className="stats-group">
+
+                      <span className="stats-heading">
+                        DEFENSE
+                      </span>
+
+                      <p>
+                        PPG Allowed: {matchupStats.away.points_allowed_per_game}
+                      </p>
+
+                      <p>
+                        Yards/Game Allowed: {matchupStats.away.yards_allowed_per_game}
+                      </p>
+
+                      <p>
+                        EPA/Play Allowed: {matchupStats.away.epa_allowed_per_play}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div className="team-stats-column">
+
+                  <h3>
+                    {teamInfo[matchupStats.home.team]?.name}
+                  </h3>
+
+                  <div className="team-record">
+                    {matchupStats.home.record}
+                  </div>
+
+                  <div className="stats-grid">
+
+                    <div className="stats-group">
+
+                      <span className="stats-heading">
+                        OFFENSE
+                      </span>
+
+                      <p>
+                        PPG: {matchupStats.home.points_per_game}
+                      </p>
+
+                      <p>
+                        Yards/Game: {matchupStats.home.yards_per_game}
+                      </p>
+
+                      <p>
+                        EPA/Play: {matchupStats.home.epa_per_play}
+                      </p>
+
+                    </div>
+
+
+                    <div className="stats-group">
+
+                      <span className="stats-heading">
+                        DEFENSE
+                      </span>
+
+                      <p>
+                        PPG Allowed: {matchupStats.home.points_allowed_per_game}
+                      </p>
+
+                      <p>
+                        Yards/Game Allowed: {matchupStats.home.yards_allowed_per_game}
+                      </p>
+
+                      <p>
+                        EPA/Play Allowed: {matchupStats.home.epa_allowed_per_play}
+                      </p>
+
+                    </div>
+
+                  </div>
 
                 </div>
 

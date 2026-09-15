@@ -13,6 +13,8 @@ from model_io import load_model
 import nflreadpy as nfl
 import polars as pl
 
+from stats import calculate_team_rankings
+
 
 # ============================================================
 # LOAD MACHINE LEARNING MODEL
@@ -190,6 +192,249 @@ def get_week_games(
         "season": season,
         "week": week,
         "games": matchups
+    }
+
+# ============================================================
+# MATCHUP TEAM STATS
+# ============================================================
+
+@app.get(
+    "/matchup-stats/{season}/{week}/{away_team}/{home_team}"
+)
+def get_matchup_stats(
+    season: int,
+    week: int,
+    away_team: str,
+    home_team: str
+):
+
+    away_team = away_team.upper()
+    home_team = home_team.upper()
+
+    games = get_schedule(
+        season
+    )
+
+    regular_games = games.filter(
+        pl.col("game_type") == "REG"
+    )
+
+    # ------------------------------------------------------------
+    # WEEK 1 USES PRIOR-SEASON STATS
+    # ------------------------------------------------------------
+
+    if week == 1:
+
+        stats_season = season - 1
+
+        stats_games = get_schedule(
+            stats_season
+        ).filter(
+            pl.col("game_type") == "REG"
+        )
+
+        stats_pbp = get_pbp(
+            stats_season
+        ).filter(
+            pl.col("season_type") == "REG"
+        )
+
+        through_week = 18
+
+    else:
+
+        stats_season = season
+
+        stats_games = regular_games.filter(
+            (pl.col("week") < week) &
+            pl.col("home_score").is_not_null() &
+            pl.col("away_score").is_not_null()
+        )
+
+        stats_pbp = get_pbp(
+            season
+        ).filter(
+            (pl.col("season_type") == "REG") &
+            (pl.col("week") < week)
+        )
+
+        through_week = week - 1
+
+    # ------------------------------------------------------------
+    # CALCULATE TEAM STATS
+    # ------------------------------------------------------------
+
+    all_team_stats = calculate_team_rankings(
+        stats_games,
+        stats_pbp
+    )
+
+    away_stats = next(
+        (
+            team
+            for team in all_team_stats
+            if team["team"] == away_team
+        ),
+        None
+    )
+
+    home_stats = next(
+        (
+            team
+            for team in all_team_stats
+            if team["team"] == home_team
+        ),
+        None
+    )
+
+    if away_stats is None or home_stats is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Team statistics are not available."
+        )
+
+    # ------------------------------------------------------------
+    # CALCULATE RECORDS
+    # ------------------------------------------------------------
+
+    def get_record(team):
+
+        team_games = stats_games.filter(
+            (pl.col("home_team") == team) |
+            (pl.col("away_team") == team)
+        )
+
+        wins = 0
+        losses = 0
+        ties = 0
+
+        for game in team_games.iter_rows(
+            named=True
+        ):
+
+            if game["home_team"] == team:
+
+                team_score = game["home_score"]
+                opponent_score = game["away_score"]
+
+            else:
+
+                team_score = game["away_score"]
+                opponent_score = game["home_score"]
+
+            if team_score > opponent_score:
+                wins += 1
+
+            elif team_score < opponent_score:
+                losses += 1
+
+            else:
+                ties += 1
+
+        return f"{wins}-{losses}-{ties}"
+
+    # ------------------------------------------------------------
+    # RESPONSE
+    # ------------------------------------------------------------
+
+    return {
+
+        "stats_season":
+            stats_season,
+
+        "through_week":
+            through_week,
+
+        "away": {
+
+            "team":
+                away_team,
+
+            "record":
+                get_record(away_team),
+
+            "points_per_game":
+                round(
+                    away_stats["points_per_game"],
+                    1
+                ),
+
+            "points_allowed_per_game":
+                round(
+                    away_stats["points_allowed_per_game"],
+                    1
+                ),
+
+            "yards_per_game":
+                round(
+                    away_stats["total_yards_per_game"],
+                    1
+                ),
+
+            "yards_allowed_per_game":
+                round(
+                    away_stats["yards_allowed_per_game"],
+                    1
+                ),
+
+            "epa_per_play":
+                round(
+                    away_stats["offensive_epa_per_play"],
+                    3
+                ),
+
+            "epa_allowed_per_play":
+                round(
+                    away_stats["defensive_epa_per_play"],
+                    3
+                )
+        },
+
+        "home": {
+
+            "team":
+                home_team,
+
+            "record":
+                get_record(home_team),
+
+            "points_per_game":
+                round(
+                    home_stats["points_per_game"],
+                    1
+                ),
+
+            "points_allowed_per_game":
+                round(
+                    home_stats["points_allowed_per_game"],
+                    1
+                ),
+
+            "yards_per_game":
+                round(
+                    home_stats["total_yards_per_game"],
+                    1
+                ),
+
+            "yards_allowed_per_game":
+                round(
+                    home_stats["yards_allowed_per_game"],
+                    1
+                ),
+
+            "epa_per_play":
+                round(
+                    home_stats["offensive_epa_per_play"],
+                    3
+                ),
+
+            "epa_allowed_per_play":
+                round(
+                    home_stats["defensive_epa_per_play"],
+                    3
+                )
+        }
     }
 
 
