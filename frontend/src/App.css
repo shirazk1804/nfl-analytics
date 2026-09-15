@@ -613,3 +613,36 @@ select:focus {
   font-weight: 700;
   margin: 6px 0;
 }
+
+.filters-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 36px;
+}
+
+.filters-row .week-section {
+  margin: 0;
+  width: 180px;
+}
+
+.filters-row select {
+  width: 100%;
+}
+
+.filters-row {
+  margin-bottom: 28px;
+}
+
+.game-section {
+  margin-bottom: 24px;
+}
+
+.matchup-card {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.predict-button {
+  margin-top: 0;
+}

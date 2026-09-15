@@ -217,64 +217,69 @@ function App() {
 
         <div className="predictor-card">
 
-          <div className="week-section">
+          <div className="filters-row">
 
-            <label>
-              Week
-            </label>
+            <div className="week-section">
 
-            <select
-              value={week}
-              onChange={(event) =>
-                setWeek(event.target.value)
-              }
-            >
+              <label>
+                Season
+              </label>
 
-              {Array.from(
-                { length: 18 },
-                (_, index) => index + 1
-              ).map((weekNumber) => (
+              <select
+                value={season}
+                onChange={(event) => {
 
-                <option
-                  key={weekNumber}
-                  value={weekNumber}
-                >
-                  Week {weekNumber}
+                  setSeason(
+                    Number(event.target.value)
+                  )
+
+                  setPrediction(null)
+                }}
+              >
+
+                <option value={2025}>
+                  2025
                 </option>
 
-              ))}
+                <option value={2026}>
+                  2026
+                </option>
 
-            </select>
+              </select>
 
-          </div>
+            </div>
 
-          <div className="week-section">
 
-            <label>
-              Season
-            </label>
+            <div className="week-section">
 
-            <select
-              value={season}
-              onChange={(event) => {
+              <label>
+                Week
+              </label>
 
-                setSeason(
-                  Number(event.target.value)
-                )
+              <select
+                value={week}
+                onChange={(event) =>
+                  setWeek(event.target.value)
+                }
+              >
 
-                setPrediction(null)
-              }}
-            >
+                {Array.from(
+                  { length: 18 },
+                  (_, index) => index + 1
+                ).map((weekNumber) => (
 
-              <option value={2025}>
-                2025
-              </option>
+                  <option
+                    key={weekNumber}
+                    value={weekNumber}
+                  >
+                    Week {weekNumber}
+                  </option>
 
-              <option value={2026}>
-                2026
-              </option>
+                ))}
 
-            </select>
+              </select>
+
+            </div>
 
           </div>
 
