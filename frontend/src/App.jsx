@@ -51,6 +51,25 @@ function getTeamLogo(team) {
   )
 }
 
+function getStatClass(
+  value,
+  opponentValue,
+  lowerIsBetter = false
+) {
+
+  if (value === opponentValue) {
+    return "stat-value"
+  }
+
+  const isBetter = lowerIsBetter
+    ? value < opponentValue
+    : value > opponentValue
+
+  return isBetter
+    ? "stat-value better-stat"
+    : "stat-value"
+}
+
 function App() {
 
   const [week, setWeek] = useState(null)
@@ -523,15 +542,39 @@ function App() {
 
                 <div className="team-stats-card">
 
+                  {/* AWAY TEAM */}
                   <div className="team-stats-column">
 
-                    <h3>
-                      {teamInfo[matchupStats.away.team]?.name}
-                    </h3>
+                    <div className="team-stats-header">
 
-                    <div className="team-record">
-                      {matchupStats.away.record}
+                      <img
+                        className="stats-team-logo"
+                        src={getTeamLogo(
+                          matchupStats.away.team
+                        )}
+                        alt={
+                          teamInfo[
+                            matchupStats.away.team
+                          ]?.name
+                        }
+                      />
+
+                      <div>
+                        <h3>
+                          {
+                            teamInfo[
+                              matchupStats.away.team
+                            ]?.name
+                          }
+                        </h3>
+
+                        <div className="team-record">
+                          {matchupStats.away.record}
+                        </div>
+                      </div>
+
                     </div>
+
 
                     <div className="stats-grid">
 
@@ -542,15 +585,39 @@ function App() {
                         </span>
 
                         <p>
-                          PPG: {matchupStats.away.points_per_game}
+                          PPG:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.points_per_game,
+                              matchupStats.home.points_per_game
+                            )}
+                          >
+                            {matchupStats.away.points_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          Yards/Game: {matchupStats.away.yards_per_game}
+                          Yards/Game:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.yards_per_game,
+                              matchupStats.home.yards_per_game
+                            )}
+                          >
+                            {matchupStats.away.yards_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          EPA/Play: {matchupStats.away.epa_per_play}
+                          EPA/Play:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.epa_per_play,
+                              matchupStats.home.epa_per_play
+                            )}
+                          >
+                            {matchupStats.away.epa_per_play}
+                          </span>
                         </p>
 
                       </div>
@@ -563,15 +630,42 @@ function App() {
                         </span>
 
                         <p>
-                          PPG Allowed: {matchupStats.away.points_allowed_per_game}
+                          PPG Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.points_allowed_per_game,
+                              matchupStats.home.points_allowed_per_game,
+                              true
+                            )}
+                          >
+                            {matchupStats.away.points_allowed_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          Yards/Game Allowed: {matchupStats.away.yards_allowed_per_game}
+                          Yards/Game Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.yards_allowed_per_game,
+                              matchupStats.home.yards_allowed_per_game,
+                              true
+                            )}
+                          >
+                            {matchupStats.away.yards_allowed_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          EPA/Play Allowed: {matchupStats.away.epa_allowed_per_play}
+                          EPA/Play Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.away.epa_allowed_per_play,
+                              matchupStats.home.epa_allowed_per_play,
+                              true
+                            )}
+                          >
+                            {matchupStats.away.epa_allowed_per_play}
+                          </span>
                         </p>
 
                       </div>
@@ -581,15 +675,39 @@ function App() {
                   </div>
 
 
+                  {/* HOME TEAM */}
                   <div className="team-stats-column">
 
-                    <h3>
-                      {teamInfo[matchupStats.home.team]?.name}
-                    </h3>
+                    <div className="team-stats-header">
 
-                    <div className="team-record">
-                      {matchupStats.home.record}
+                      <img
+                        className="stats-team-logo"
+                        src={getTeamLogo(
+                          matchupStats.home.team
+                        )}
+                        alt={
+                          teamInfo[
+                            matchupStats.home.team
+                          ]?.name
+                        }
+                      />
+
+                      <div>
+                        <h3>
+                          {
+                            teamInfo[
+                              matchupStats.home.team
+                            ]?.name
+                          }
+                        </h3>
+
+                        <div className="team-record">
+                          {matchupStats.home.record}
+                        </div>
+                      </div>
+
                     </div>
+
 
                     <div className="stats-grid">
 
@@ -600,15 +718,39 @@ function App() {
                         </span>
 
                         <p>
-                          PPG: {matchupStats.home.points_per_game}
+                          PPG:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.points_per_game,
+                              matchupStats.away.points_per_game
+                            )}
+                          >
+                            {matchupStats.home.points_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          Yards/Game: {matchupStats.home.yards_per_game}
+                          Yards/Game:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.yards_per_game,
+                              matchupStats.away.yards_per_game
+                            )}
+                          >
+                            {matchupStats.home.yards_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          EPA/Play: {matchupStats.home.epa_per_play}
+                          EPA/Play:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.epa_per_play,
+                              matchupStats.away.epa_per_play
+                            )}
+                          >
+                            {matchupStats.home.epa_per_play}
+                          </span>
                         </p>
 
                       </div>
@@ -621,15 +763,42 @@ function App() {
                         </span>
 
                         <p>
-                          PPG Allowed: {matchupStats.home.points_allowed_per_game}
+                          PPG Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.points_allowed_per_game,
+                              matchupStats.away.points_allowed_per_game,
+                              true
+                            )}
+                          >
+                            {matchupStats.home.points_allowed_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          Yards/Game Allowed: {matchupStats.home.yards_allowed_per_game}
+                          Yards/Game Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.yards_allowed_per_game,
+                              matchupStats.away.yards_allowed_per_game,
+                              true
+                            )}
+                          >
+                            {matchupStats.home.yards_allowed_per_game}
+                          </span>
                         </p>
 
                         <p>
-                          EPA/Play Allowed: {matchupStats.home.epa_allowed_per_play}
+                          EPA/Play Allowed:{" "}
+                          <span
+                            className={getStatClass(
+                              matchupStats.home.epa_allowed_per_play,
+                              matchupStats.away.epa_allowed_per_play,
+                              true
+                            )}
+                          >
+                            {matchupStats.home.epa_allowed_per_play}
+                          </span>
                         </p>
 
                       </div>
@@ -641,176 +810,176 @@ function App() {
                 </div>
               </>
 
-                )
+            )
           }
 
 
-                <button
-                  className="predict-button"
-                  onClick={predictGame}
-                  disabled={
-                    loading ||
-                    gamesLoading ||
-                    !currentGame
+          <button
+            className="predict-button"
+            onClick={predictGame}
+            disabled={
+              loading ||
+              gamesLoading ||
+              !currentGame
+            }
+          >
+
+            {
+              gamesLoading
+                ? "Loading Games..."
+                : loading
+                  ? "Predicting..."
+                  : "Predict Game"
+            }
+
+          </button>
+
+
+          {
+            error && (
+
+              <div className="error">
+                {error}
+              </div>
+
+            )
+          }
+
+
+          {
+            prediction && (
+
+              <div className="results">
+
+                <p className="result-label">
+                  {
+                    currentGame?.completed
+                      ? "PREGAME PREDICTION"
+                      : "PREDICTED WINNER"
                   }
-                >
+                </p>
+
+                <img
+                  className="winner-logo"
+                  src={getTeamLogo(
+                    prediction.predicted_winner
+                  )}
+                  alt={
+                    teamInfo[
+                      prediction.predicted_winner
+                    ]?.name
+                  }
+                />
+
+                <h2 className="winner-name">
+                  {
+                    teamInfo[
+                      prediction.predicted_winner
+                    ]?.name
+                  }
+                </h2>
+
+                <div className="winner-probability">
 
                   {
-                    gamesLoading
-                      ? "Loading Games..."
-                      : loading
-                        ? "Predicting..."
-                        : "Predict Game"
-                  }
+                    prediction.predicted_winner ===
+                      prediction.home_team
+                      ? prediction.home_probability
+                      : prediction.away_probability
+                  }%
 
-                </button>
-
-
-                {
-                  error && (
-
-                    <div className="error">
-                      {error}
-                    </div>
-
-                  )
-                }
+                </div>
 
 
-                {
-                  prediction && (
+                <div className="probability-bars">
 
-                    <div className="results">
+                  <div className="probability-row">
 
-                      <p className="result-label">
+                    <div className="probability-header">
+
+                      <span>
                         {
-                          currentGame?.completed
-                            ? "PREGAME PREDICTION"
-                            : "PREDICTED WINNER"
-                        }
-                      </p>
-
-                      <img
-                        className="winner-logo"
-                        src={getTeamLogo(
-                          prediction.predicted_winner
-                        )}
-                        alt={
                           teamInfo[
-                            prediction.predicted_winner
+                            prediction.away_team
                           ]?.name
                         }
+                      </span>
+
+                      <strong>
+                        {
+                          prediction.away_probability
+                        }%
+                      </strong>
+
+                    </div>
+
+                    <div className="bar-track">
+
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width:
+                            `${prediction.away_probability}%`
+                        }}
                       />
 
-                      <h2 className="winner-name">
+                    </div>
+
+                  </div>
+
+
+                  <div className="probability-row">
+
+                    <div className="probability-header">
+
+                      <span>
                         {
                           teamInfo[
-                            prediction.predicted_winner
+                            prediction.home_team
                           ]?.name
                         }
-                      </h2>
+                      </span>
 
-                      <div className="winner-probability">
-
+                      <strong>
                         {
-                          prediction.predicted_winner ===
-                            prediction.home_team
-                            ? prediction.home_probability
-                            : prediction.away_probability
+                          prediction.home_probability
                         }%
-
-                      </div>
-
-
-                      <div className="probability-bars">
-
-                        <div className="probability-row">
-
-                          <div className="probability-header">
-
-                            <span>
-                              {
-                                teamInfo[
-                                  prediction.away_team
-                                ]?.name
-                              }
-                            </span>
-
-                            <strong>
-                              {
-                                prediction.away_probability
-                              }%
-                            </strong>
-
-                          </div>
-
-                          <div className="bar-track">
-
-                            <div
-                              className="bar-fill"
-                              style={{
-                                width:
-                                  `${prediction.away_probability}%`
-                              }}
-                            />
-
-                          </div>
-
-                        </div>
-
-
-                        <div className="probability-row">
-
-                          <div className="probability-header">
-
-                            <span>
-                              {
-                                teamInfo[
-                                  prediction.home_team
-                                ]?.name
-                              }
-                            </span>
-
-                            <strong>
-                              {
-                                prediction.home_probability
-                              }%
-                            </strong>
-
-                          </div>
-
-                          <div className="bar-track">
-
-                            <div
-                              className="bar-fill"
-                              style={{
-                                width:
-                                  `${prediction.home_probability}%`
-                              }}
-                            />
-
-                          </div>
-
-                          <p className="data-source">
-                            Based on {prediction.data_source}
-                          </p>
-
-                        </div>
-
-                      </div>
+                      </strong>
 
                     </div>
 
-                  )
-                }
+                    <div className="bar-track">
+
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width:
+                            `${prediction.home_probability}%`
+                        }}
+                      />
+
+                    </div>
+
+                    <p className="data-source">
+                      Based on {prediction.data_source}
+                    </p>
+
+                  </div>
+
+                </div>
 
               </div>
+
+            )
+          }
 
         </div>
 
       </div>
-      )
+
+    </div>
+  )
 }
 
 
-      export default App
+export default App
