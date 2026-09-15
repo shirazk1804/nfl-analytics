@@ -815,3 +815,11 @@ select:focus {
     padding-top: 28px;
   }
 }
+
+.epa-note {
+  margin: -2px 0 14px;
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}

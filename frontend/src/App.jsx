@@ -540,6 +540,11 @@ function App() {
                   {matchupStats.stats_season} stats through Week {matchupStats.through_week}
                 </div>
 
+                <div className="epa-note">
+                  EPA/Play = Expected Points Added per play.
+                  Higher offensive EPA is better; lower defensive EPA allowed is better.
+                </div>
+
                 <div className="team-stats-card">
 
                   {/* AWAY TEAM */}
