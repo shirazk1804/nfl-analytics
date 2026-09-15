@@ -472,7 +472,11 @@ function App() {
               <div className="results">
 
                 <p className="result-label">
-                  PREDICTED WINNER
+                  {
+                    currentGame?.completed
+                      ? "PREGAME PREDICTION"
+                      : "PREDICTED WINNER"
+                  }
                 </p>
 
                 <img
