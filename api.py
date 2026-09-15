@@ -158,6 +158,14 @@ def get_week_games(
         named=True
     ):
 
+        away_score = game["away_score"]
+        home_score = game["home_score"]
+
+        completed = (
+            away_score is not None and
+            home_score is not None
+        )
+
         matchups.append({
             "away_team":
                 game["away_team"],
@@ -166,7 +174,16 @@ def get_week_games(
                 game["home_team"],
 
             "gameday":
-                str(game["gameday"])
+                str(game["gameday"]),
+
+            "away_score":
+                away_score,
+
+            "home_score":
+                home_score,
+
+            "completed":
+                completed
         })
 
     return {

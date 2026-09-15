@@ -370,9 +370,25 @@ function App() {
                     WEEK {week}
                   </span>
 
-                  <strong>
-                    @
-                  </strong>
+                  {
+                    currentGame.completed ? (
+                      <>
+                        <strong>
+                          FINAL
+                        </strong>
+
+                        <div className="final-score">
+                          {currentGame.away_score}
+                          {" - "}
+                          {currentGame.home_score}
+                        </div>
+                      </>
+                    ) : (
+                      <strong>
+                        @
+                      </strong>
+                    )
+                  }
 
                   <small>
                     {currentGame.gameday}
