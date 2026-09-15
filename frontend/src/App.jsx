@@ -53,7 +53,7 @@ function getTeamLogo(team) {
 
 function App() {
 
-  const [week, setWeek] = useState(1)
+  const [week, setWeek] = useState(null)
   const [season, setSeason] = useState(2026)
 
   const [games, setGames] = useState([])
@@ -72,10 +72,50 @@ function App() {
     ? games[Number(selectedGame)]
     : null
 
+  useEffect(() => {
+
+    async function loadCurrentWeek() {
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/current-week/${season}`
+        )
+
+        if (!response.ok) {
+          throw new Error(
+            "Could not determine current week"
+          )
+        }
+
+        const data = await response.json()
+
+        setWeek(
+          Number(data.week)
+        )
+
+      } catch (error) {
+
+        console.error(
+          "Current week error:",
+          error
+        )
+
+        setWeek(1)
+      }
+    }
+
+    loadCurrentWeek()
+
+  }, [season])
 
   useEffect(() => {
 
     async function loadGames() {
+
+      if (week === null) {
+        return
+      }
 
       setError("")
       setPrediction(null)
@@ -292,7 +332,7 @@ function App() {
               </label>
 
               <select
-                value={week}
+                value={week ?? ""}
                 onChange={(event) =>
                   setWeek(event.target.value)
                 }

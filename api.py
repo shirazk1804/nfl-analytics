@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from model_io import load_model
 
 import nflreadpy as nfl
@@ -437,6 +440,66 @@ def get_matchup_stats(
         }
     }
 
+# ============================================================
+# CURRENT NFL WEEK
+# ============================================================
+
+@app.get("/current-week/{season}")
+def get_current_week(
+    season: int
+):
+
+    games = get_schedule(
+        season
+    )
+
+    regular_games = games.filter(
+        pl.col("game_type") == "REG"
+    )
+
+    today = datetime.now(
+        ZoneInfo("America/New_York")
+    ).date()
+
+    upcoming_weeks = []
+
+    for game in regular_games.iter_rows(
+        named=True
+    ):
+
+        game_date = game["gameday"]
+
+        if isinstance(game_date, str):
+
+            game_date = datetime.strptime(
+                game_date,
+                "%Y-%m-%d"
+            ).date()
+
+        elif isinstance(game_date, datetime):
+
+            game_date = game_date.date()
+
+        if game_date >= today:
+
+            upcoming_weeks.append(
+                game["week"]
+            )
+
+    if not upcoming_weeks:
+
+        current_week = 18
+
+    else:
+
+        current_week = min(
+            upcoming_weeks
+        )
+
+    return {
+        "season": season,
+        "week": current_week
+    }
 
 # ============================================================
 # GAME PREDICTION
